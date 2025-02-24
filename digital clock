@@ -1,0 +1,42 @@
+import React, { useState, useEffect } from 'react';
+
+const Stopwatch = () => {
+    const [isrun, setisrun] = useState(false);
+    const [elapsed, setelapsed] = useState(0);
+    const [starttime, setstarttime] = useState(null);
+
+    const abc = () => {
+        if (!isrun) {
+            setstarttime(Date.now() - elapsed); // Preserve elapsed time on resume
+        }
+        setisrun(!isrun);
+    };
+
+    const abcres = () => {
+        setisrun(false);
+        setelapsed(0);
+        setstarttime(null);
+    };
+
+    useEffect(() => {
+        let interval;
+        if (isrun) {
+            interval = setInterval(() => {
+                setelapsed(Date.now() - starttime);
+            }, 100); // Update every 100ms
+        } else {
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval); // Cleanup on stop
+    }, [isrun, starttime]);
+
+    return (
+        <div>
+            <h1>{(elapsed / 1000).toFixed(2)}s</h1>
+            <button onClick={abc}>{isrun ? 'Stop' : 'Start'}</button>
+            <button onClick={abcres}>Reset</button>
+        </div>
+    );
+};
+
+export default Stopwatch;
