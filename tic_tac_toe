@@ -1,0 +1,67 @@
+import React,{useState} from 'react';
+const solve=(board)=>{
+     const succ=[[0, 1, 2], [3, 4, 5],[6, 7, 8],[0, 3, 6],[1, 4, 7],[2, 5, 8],[0, 4, 8],[2, 4, 6]];
+     for(let [a,b,c] of succ)
+     {
+        if(board[a] && board[a]===board[b] && board[a]===board[c])
+        {
+           return board[a];
+        }
+     }
+     return null;
+  }
+const App=()=>{
+  const init=Array(9).fill(null);
+  const [board,setboard]=useState(init);
+  const [isxturn,setisxturn]=useState(true);
+  const winner=solve(board);
+  const funcsetboard=(idx)=>{
+   if(winner || !board.includes(null)) return;
+    const newboard=[...board];
+    newboard[idx]=isxturn?'X':'O';
+    setisxturn(!isxturn);
+    setboard(newboard);
+  }
+  const funcreset=()=>{
+    setboard(init);
+   setisxturn(true);
+  }  
+  let  status;
+if(winner)
+{
+   status=`winner:${winner}`;
+}
+else if(board.includes(null))
+{
+   if(isxturn)
+   {
+      status=`Turn:"X"`
+   }
+   else
+   {
+      status=`Turn:"O"`
+   }
+}
+else
+{
+   status="game ended in a draw"
+}
+   return(
+    <div style={{textAlign:"center"}}>
+    <h1 style={{color:winner?"blue":"black"}}>{status}</h1>
+    {
+      winner?(<></>):
+       <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 100px)",gap:"5px",margin:"20px auto",width:"max-content"}}>
+        {board.map((ele,idx)=>(
+         <button key={idx} value={ele}  onClick={() => funcsetboard(idx)} style={{ width: "100px", height: "100px", fontSize: "24px", fontWeight: "bold", cursor: "pointer" }}>
+              {ele}
+         </button>
+        ))}
+           
+        </div>
+    }
+      <button onClick={funcreset} style={{ marginTop: "10px", fontSize: "18px", padding: "10px 20px" }}>Reset</button>
+    </div>
+   )
+}
+export default App;
