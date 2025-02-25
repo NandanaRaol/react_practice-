@@ -1,0 +1,53 @@
+   question: https://www.greatfrontend.com/questions/user-interface/job-board/react?framework=react&tab=coding
+
+
+
+import React,{useState,useEffect} from 'react';
+const JOBS_PER_PAGE=6;
+const App=()=>{
+    const [jobids,setjobids]=useState([]);
+    const [jobs,setjobs]=useState([]);
+    const [page,setpage]=useState(0);
+    const [loading,setloading]=useState(false);
+    useEffect(()=>{
+        fetch("https://hacker-news.firebaseio.com/v0/jobstories.json")
+          .then((res)=>res.json())
+          .then((data)=>setjobids(data.slice(0,30)))
+          .catch((error)=>console.log("errr fetching jb ids",error));
+    },[]);
+     useEffect(()=>{
+       if(jobids.length==0)
+            return;
+       const fetchjobs=async()=>{
+         setloading(true);
+         const start=page*JOBS_PER_PAGE;
+         const end=start+JOBS_PER_PAGE;
+         const jobidstofetch=jobids.slice(start,end);
+         const jobpromises=jobidstofetch.map((id)=>(
+            fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
+           .then((res)=>res.json())
+         ));
+         const jobdata=await Promise.all(jobpromises);
+         setjobs((prev)=>[...prev,...jobdata]);
+         setloading(false);
+       };
+         fetchjobs();
+     },[page,jobids]);
+return(
+  <div>
+      <h1>Latest Job Postings</h1>
+     <ul>
+         {jobs.map((job)=>(
+      <li key={job.id}>{job.url?(<a href={job.url}>{job.title}</a>):(<span>{job.title}</span>)}
+      <p>Posted by:{job.by}</p>
+     <p>Date: {new Date(job.time*1000).toLocaleString()}</p>
+      </li>
+         ))}
+     </ul>
+    {page*JOBS_PER_PAGE<jobids.length && !loading &&(
+     <button onClick={()=>setpage((prev)=>(prev+1))}>Load More</button>
+    )}
+  </div>
+);
+};
+export default App;
